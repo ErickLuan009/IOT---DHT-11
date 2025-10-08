@@ -7,7 +7,7 @@
 </head>
 <body>
     <h2>Monitoramento DHT11</h2>
-    <canvas id="grafico" width=="400" height="200"></canvas>
+    <canvas id="grafico" width="400" height="200"></canvas>
 
     <script>
         const client = mqtt.connet("wss://broker.hivemq.com:8844/mqtt")
@@ -17,6 +17,33 @@
         const humData = [];
 
         const ctx = document.getElementById("grafico").getContext("2d");
+        const chart = new Chart(ctx, {
+            type: "line", 
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: "Temperatura (°C)", data: tempData, bordercolor: "red",fill: false },
+                    {label: "Umidade (%)", data: humData, borderColor: "blue", fill: false }
+                ]
+            }
+        });
+        client.on("connetc", () => {
+            console.log("Conectado ao MQTT");
+            cliente.subcribe("senai/iot/dht11");
+        });
+        client.on("message", (topic, message) => {
+            const data = JSON.parse(message.toString());
+            const time = new Date().toLocalTimeString()();
+            
+            labels.push(time);
+            tempData.push(data.temperatura);
+            humData.push(data.umidade);
+
+            if (labels.push(time)); {
+            labels.shift(); tempData.shift(); humData.shift();
+            }
+            chart.update();
+        })
     </script>
 </body>
 </html>
